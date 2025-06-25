@@ -18,8 +18,7 @@ public class ENEMIGO {
         y += velocidad;
     }
 
-    public void recibirDanio(int cantidad) {
-        cantidad=100;
+    public void Danio(int cantidad) {
         vida -= cantidad;
         if (vida <= 0) {
             vida = 0;
