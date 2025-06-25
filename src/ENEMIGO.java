@@ -26,10 +26,6 @@ public class ENEMIGO {
         }
     }
 
-    public boolean Eliminacion() {
-        return vida <= 0;
-    }
-
     public void Spawn() {
         System.out.println("[Alien] Posición: (" + x + ", " + y + ") - Vida: " + vida + " - Velocidad: " + velocidad);
     }
