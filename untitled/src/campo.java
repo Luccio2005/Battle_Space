@@ -1,7 +1,7 @@
 public class campo {
     private String[][] campo;
 
-    public CampoDeBatalla(int filas, int columnas) {
+    public campo(int filas, int columnas) {
         campo = new String[filas][columnas];
         inicializarCampo();
     }
