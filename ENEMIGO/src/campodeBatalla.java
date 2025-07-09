@@ -26,19 +26,17 @@ public class campodeBatalla {
 
     public void limpiarCelda(int x, int y) {
         if (x >= 0 && x < filas && y >= 0 && y < columnas) {
-            campo[x][y] = ".";
+            campo[x][y] = "."; // Limpiar celda
         }
     }
 
-    // Evitar Bugs
-    public boolean estaOcupado(int fila, int columna) {
-        if (fila >= 0 && fila < filas && columna >= 0 && columna < columnas) {
-            return campo[fila][columna].equals("E");
+    public boolean estaOcupado(int x, int y) {
+        if (x >= 0 && x < filas && y >= 0 && y < columnas) {
+            return !campo[x][y].equals(".");
         }
         return false;
     }
 
-    // Pre Visualizacin del Campo
     public void mostrarCampo() {
         for (int i = 0; i < filas; i++) {
             for (int j = 0; j < columnas; j++) {
