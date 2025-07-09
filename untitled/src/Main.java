@@ -6,13 +6,14 @@ import java.util.ArrayList;
 public class Main extends JPanel implements KeyListener {
 
     nave nave;
-    ArrayList<Disparos> disparos = new ArrayList<>();
+    ArrayList<Disparos> disparos;
     Timer timer;
+    ControladorJuego controlador;
 
     public Main() {
         nave = new nave(200, 100);
+        disparos = new ArrayList<>();
 
-        // Timer para animación (disparos que suben)
         timer = new Timer(30, e -> {
             for (Disparos d : disparos) {
                 d.mover();
@@ -22,7 +23,8 @@ public class Main extends JPanel implements KeyListener {
         });
         timer.start();
 
-        // Configuración ventana
+        controlador = new ControladorJuego(timer, nave, disparos);
+
         JFrame frame = new JFrame("Nave con Disparos");
         frame.setSize(600, 600);
         frame.add(this);
@@ -42,12 +44,7 @@ public class Main extends JPanel implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        char tecla = Character.toLowerCase(e.getKeyChar());
-        if (tecla == 'a') nave.moverIzquierda();
-        if (tecla == 'd') nave.moverDerecha();
-        if (tecla == 'w') nave.moverArriba();
-        if (tecla == 's') nave.moverAbajo();
-        if (tecla == ' ') disparos.add(nave.disparar());
+        ControladorEntrada.procesarTecla(e, nave, disparos, controlador);
         repaint();
     }
 

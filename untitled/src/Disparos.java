@@ -1,5 +1,5 @@
-import java.awt.Graphics;
-import java.awt.Color;
+import java.awt.*;
+
 public class Disparos {
     int x, y;
     int velocidad = 15;
@@ -15,11 +15,10 @@ public class Disparos {
 
     public void dibujar(Graphics g) {
         g.setColor(Color.RED);
-        g.drawString("|", x, y);  // Símbolo del disparo
+        g.drawString("|", x, y);
     }
 
     public boolean estaFuera() {
         return y < 0;
     }
-
 }
