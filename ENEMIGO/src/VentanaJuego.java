@@ -1,92 +1,57 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Random;
 
 public class VentanaJuego extends JPanel {
-    private ArrayList<ENEMIGO> enemigos = new ArrayList<>();
-    private ArrayList<ProyectilEnemigo> proyectiles = new ArrayList<>();
+    private ENEMIGO enemigo;
+    private int direccion = 1; // 1 = derecha, -1 = izquierda
     private Timer timer;
-    private Random random = new Random();
-    private campodeBatalla campo;
-    private int cicloDisparo = 0;
 
     public VentanaJuego() {
-        setPreferredSize(new Dimension(500, 400));
+        enemigo = new ENEMIGO(100, 100, 150, 2);
+
+        setPreferredSize(new Dimension(500, 300));
         setBackground(Color.BLACK);
-        campo = new campodeBatalla(20, 20);
 
-        // Crear enemigos iniciales
-        for (int i = 0; i < 5; i++) {
-            crearEnemigoAleatorio();
-        }
-
-        timer = new Timer(60, e -> actualizar());
+        timer = new Timer(30, e -> actualizar());
         timer.start();
     }
 
-    private void crearEnemigoAleatorio() {
-        int anchoVentana = getPreferredSize().width;
-        int x = random.nextInt(anchoVentana - 40);
-        int velocidad = 1 + random.nextInt(2);
-
-        ENEMIGO nuevo = new ENEMIGO(x, 0, 100, velocidad);
-        enemigos.add(nuevo);
-    }
-
     private void actualizar() {
-        cicloDisparo++;
-
-        // Mover enemigos y disparar en intervalos
-        Iterator<ENEMIGO> itEnemigos = enemigos.iterator();
-        while (itEnemigos.hasNext()) {
-            ENEMIGO enemigo = itEnemigos.next();
-            enemigo.setY(enemigo.getY() + enemigo.getVelocidad());
-
-            // Cada 20 ciclos, disparan
-            if (cicloDisparo % 20 == 0) {
-                proyectiles.add(new ProyectilEnemigo(enemigo.getX() + 10, enemigo.getY() + 30, 6));
-            }
-
-            // Eliminar enemigos fuera de pantalla
-            if (enemigo.getY() > getHeight()) {
-                itEnemigos.remove();
-            }
+        int nuevaX = enemigo.getX() + direccion * enemigo.getVelocidad();
+        if (nuevaX <= 0 || nuevaX >= getWidth() - 60) {
+            direccion *= -1;
         }
-
-        // Mover proyectiles enemigos
-        Iterator<ProyectilEnemigo> itProy = proyectiles.iterator();
-        while (itProy.hasNext()) {
-            ProyectilEnemigo p = itProy.next();
-            p.mover();
-            if (p.estaFueraDeCampo(getHeight())) {
-                itProy.remove();
-            }
-        }
-
-        // Aparecen enemigos nuevos (puedes ajustar esto si también quieres quitar el random aquí)
-        if (enemigos.size() < 10 && cicloDisparo % 60 == 0) {
-            crearEnemigoAleatorio();
-        }
-
+        enemigo.setX(enemigo.getX() + direccion * enemigo.getVelocidad());
         repaint();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        setBackground(Color.BLACK);
+        Graphics2D g2d = (Graphics2D) g;
 
-        g.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 36));
-        g.setColor(Color.WHITE);
-        for (ENEMIGO enemigo : enemigos) {
-            g.drawString("🛸", enemigo.getX(), enemigo.getY() + 30);
-        }
+        int x = enemigo.getX();
+        int y = enemigo.getY();
 
-        g.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 24));
-        g.setColor(Color.YELLOW);
-        for (ProyectilEnemigo p : proyectiles) {
-            g.drawString("⇓", p.getX(), p.getY());
-        }
+        // Diseño Nave
+        g2d.setColor(Color.RED);
+        int[] px = { x + 10, x + 50, x + 40, x + 20 };
+        int[] py = { y,      y,      y + 30,    y + 30 };
+        g2d.fillPolygon(px, py, 4);
+
+        // Ojo de Nave
+        g2d.setColor(Color.YELLOW);
+        g2d.fillOval(x + 23, y + 10, 5, 5);
+    }
+
+    public static void main(String[] args) {
+        JFrame ventana = new JFrame("Battle Space - Nave Enemiga");
+        ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        ventana.setResizable(false);
+        ventana.add(new VentanaJuego());
+        ventana.pack();
+        ventana.setLocationRelativeTo(null);
+        ventana.setVisible(true);
     }
 }
