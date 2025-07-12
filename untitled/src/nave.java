@@ -3,6 +3,7 @@ import java.awt.*;
 public class nave {
     int x, y;
     int velocidad = 10;
+    private int vida = 5; // NUEVO: vida de la nave
 
     public nave(int x, int y) {
         this.x = x;
@@ -28,7 +29,21 @@ public class nave {
     public Disparos disparar() {
         return new Disparos(x + 5, y);
     }
+    // NUEVOS MÉTODOS
+    public void recibirDanio() {
+        vida--;
+        System.out.println("Nave recibió daño. Vida restante: " + vida);
+    }
+
+    public boolean estaDestruida() {
+        return vida <= 0;
+    }
+
+    public int getX() { return x; }
+    public int getY() { return y; }
+    public int getVida() { return vida; }
 
     public void setX(int x) { this.x = x; }
     public void setY(int y) { this.y = y; }
 }
+

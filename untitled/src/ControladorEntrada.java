@@ -16,15 +16,12 @@ public class ControladorEntrada {
             case ' ' -> disparos.add(nave.disparar());
         }
 
-        // Teclas rápidas
         if (code == KeyEvent.VK_P) controlador.pausar();
         if (code == KeyEvent.VK_R) controlador.reanudar();
         if (code == KeyEvent.VK_ENTER) controlador.reiniciar();
 
-        // MENÚ: con tecla ESC
         if (code == KeyEvent.VK_ESCAPE) {
-            controlador.pausar(); // Pausa el juego mientras se abre el menú
-
+            controlador.pausar();
             String[] opciones = { "Reanudar", "Reiniciar", "Salir" };
             int seleccion = JOptionPane.showOptionDialog(
                     null,
@@ -38,9 +35,9 @@ public class ControladorEntrada {
             );
 
             switch (seleccion) {
-                case 0 -> controlador.reanudar();     // Reanudar
-                case 1 -> controlador.reiniciar();    // Reiniciar
-                case 2 -> System.exit(0);             // Salir del juego
+                case 0 -> controlador.reanudar();
+                case 1 -> controlador.reiniciar();
+                case 2 -> System.exit(0);
             }
         }
     }
