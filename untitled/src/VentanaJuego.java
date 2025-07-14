@@ -67,6 +67,25 @@ public class VentanaJuego extends JPanel implements KeyListener {
         }
 
         detectarColisiones();
+        // Detectar colisiones entre disparos del jugador y proyectiles enemigos
+        Iterator<Disparos> itDisparos = disparos.iterator();
+        while (itDisparos.hasNext()) {
+            Disparos disparo = itDisparos.next();
+            Rectangle rDisparo = new Rectangle(disparo.x, disparo.y, 5, 10);
+
+            Iterator<ProyectilEnemigo> itProy = proyectiles.iterator();
+            while (itProy.hasNext()) {
+                ProyectilEnemigo pEnemigo = itProy.next();
+                Rectangle rProyEnemigo = new Rectangle(pEnemigo.getX(), pEnemigo.getY(), 5, 10);
+
+                if (rDisparo.intersects(rProyEnemigo)) {
+                    itDisparos.remove();
+                    itProy.remove();
+                    break; // salir del bucle interno
+                }
+            }
+        }
+
         repaint();
         Iterator<ProyectilEnemigo> itProy = proyectiles.iterator();
         while (itProy.hasNext()) {
