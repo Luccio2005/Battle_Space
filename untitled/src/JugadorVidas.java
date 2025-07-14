@@ -20,7 +20,7 @@ public class Jugador Vidas {
     }
 
     public void dibujar(Graphics g) {
-        g.setColor(Color.RED);
+        g.setColor(Color.BLUE);
         g.fillRect(x, y, 40, 20); 
 
         g.setFont(new Font("Arial", Font.BOLD, 18));
