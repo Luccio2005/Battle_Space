@@ -1,6 +1,6 @@
 public class Jugador Vidas {
     private int x, y;
-    private int vidas = 3;
+    private int vidas = 5;
     private boolean estaVivo = true;
 
     public Jugador(int x, int y) {
