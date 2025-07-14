@@ -14,6 +14,9 @@ public class VentanaJuego extends JPanel implements KeyListener {
     private Timer timer;
     private ControladorJuego controlador;
     private Random random = new Random();
+    private AnimacionExplosion explosion;
+    private boolean naveDestruida = false;
+
 
     public VentanaJuego() {
         setPreferredSize(new Dimension(600, 600));
@@ -77,12 +80,20 @@ public class VentanaJuego extends JPanel implements KeyListener {
                 itProy.remove();
                 nave.recibirDanio();
                 if (nave.estaDestruida()) {
-                    timer.stop();
-                    JOptionPane.showMessageDialog(this, "¡La nave ha sido destruida!", "Game Over", JOptionPane.ERROR_MESSAGE);
-                    System.exit(0); // Cierra el juego
+                    naveDestruida = true;
+                    explosion = new AnimacionExplosion(nave.getX(), nave.getY());
+                    // Cierra el juego
                 }
             } else if (p.estaFueraDeCampo(getHeight())) {
                 itProy.remove();
+            }
+        }
+        if (naveDestruida && explosion != null) {
+            explosion.actualizar();
+            if (explosion.haTerminado()) {
+                timer.stop();
+                JOptionPane.showMessageDialog(this, "¡La nave fue destruida!", "Game Over", JOptionPane.ERROR_MESSAGE);
+                System.exit(0);
             }
         }
     }
@@ -138,6 +149,11 @@ public class VentanaJuego extends JPanel implements KeyListener {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+        if (naveDestruida && explosion != null) {
+            explosion.dibujar(g);
+            return; // no dibujamos más si la nave explotó
+        }
+
         nave.dibujar(g);
 
         for (Disparos d : disparos) d.dibujar(g);
