@@ -1,8 +1,8 @@
-import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
+import javax.swing.*;
 
 public class VentanaJuego extends JPanel {
     private ArrayList<ENEMIGO> enemigos = new ArrayList<>();
@@ -11,11 +11,14 @@ public class VentanaJuego extends JPanel {
     private Random random = new Random();
     private campodeBatalla campo;
 
+    private Jefe jefe = null;
+    private int enemigosEliminados = 0;
+
     public VentanaJuego() {
         setPreferredSize(new Dimension(500, 400));
         setBackground(Color.BLACK);
         campo = new campodeBatalla(20, 20); // campo lógico
-        // Timer para actualizar
+
         timer = new Timer(60, e -> actualizar());
         timer.start();
     }
@@ -48,13 +51,12 @@ public class VentanaJuego extends JPanel {
     }
 
     private void actualizar() {
-        // Mover enemigos y generar disparos
         Iterator<ENEMIGO> itEnemigos = enemigos.iterator();
         while (itEnemigos.hasNext()) {
             ENEMIGO enemigo = itEnemigos.next();
             enemigo.setY(enemigo.getY() + enemigo.getVelocidad());
 
-            if (random.nextInt(50) < 1 ) { // Cantidad de disparo
+            if (random.nextInt(50) < 1) {
                 proyectiles.add(new ProyectilEnemigo(enemigo.getX() + 10, enemigo.getY() + 30, 6));
             }
 
@@ -76,8 +78,22 @@ public class VentanaJuego extends JPanel {
             }
         }
 
-        // Agregar enemigos si hay espacio
-        if (random.nextInt(100) < 1 && enemigos.size() < 10) {
+        // Crear jefe si no existe y se eliminaron suficientes enemigos
+        if (jefe == null && enemigosEliminados >= 10) {
+            jefe = new Jefe(getWidth() / 2 - 60, 100, 3, 20); // x, y, velocidad, vida
+        }
+
+        // Mover jefe
+        if (jefe != null) {
+            jefe.moverHorizontal(getWidth());
+            if (random.nextInt(25) == 0) {
+                // Ajustar para que los disparos salgan justo debajo del jefe
+                proyectiles.add(new ProyectilEnemigo(jefe.getX() + jefe.getAncho() / 2, jefe.getY() + jefe.getAlto(), 6));
+            }
+        }
+
+        // Agregar enemigos si no hay jefe todavía
+        if (jefe == null && random.nextInt(100) < 1 && enemigos.size() < 10) {
             crearEnemigoAleatorio();
         }
 
@@ -98,6 +114,10 @@ public class VentanaJuego extends JPanel {
         g.setColor(Color.YELLOW);
         for (ProyectilEnemigo p : proyectiles) {
             g.drawString("⇓", p.getX(), p.getY());
+        }
+
+        if (jefe != null) {
+            jefe.dibujar(g);
         }
     }
 }
