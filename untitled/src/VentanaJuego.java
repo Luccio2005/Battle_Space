@@ -1,9 +1,3 @@
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.Timer;
-
 public class VentanaJuego extends JPanel implements KeyListener {
 
     private nave nave;
@@ -17,6 +11,9 @@ public class VentanaJuego extends JPanel implements KeyListener {
     private AnimacionExplosion explosion;
     private boolean naveDestruida = false;
 
+    // Agregar el jefe
+    private Jefe jefe = null;
+    private int contadorDisparoJefe = 0;  // Controla cuándo dispara el jefe
 
     public VentanaJuego() {
         setPreferredSize(new Dimension(600, 600));
@@ -66,8 +63,35 @@ public class VentanaJuego extends JPanel implements KeyListener {
             crearEnemigoAleatorio();
         }
 
+        // --- Manejar jefe ---
+        if (jefe == null && enemigos.size() >= 10) {
+            // Cuando hay 10 enemigos, aparece el jefe (por ejemplo)
+            jefe = new Jefe(100, 50, 3, 10);
+        }
+
+        if (jefe != null) {
+            jefe.moverHorizontal(getWidth());
+
+            // Controlar disparo del jefe cada cierto tiempo
+            contadorDisparoJefe++;
+            if (contadorDisparoJefe >= 60) {  // Cada 60 ciclos aprox
+                jefe.disparar(proyectiles);
+                contadorDisparoJefe = 0;
+            }
+
+            // El jefe baja lentamente (opcional)
+            // jefe.setY(jefe.getY() + 1);
+
+            // Si el jefe muere, quitarlo
+            if (jefe.getVida() <= 0) {
+                jefe = null;
+                // Quizás añadir más lógica al ganar jefe
+            }
+        }
+
         detectarColisiones();
-        // Detectar colisiones entre disparos del jugador y proyectiles enemigos
+
+        // Detectar colisiones entre disparos y proyectiles enemigos
         Iterator<Disparos> itDisparos = disparos.iterator();
         while (itDisparos.hasNext()) {
             Disparos disparo = itDisparos.next();
@@ -81,12 +105,28 @@ public class VentanaJuego extends JPanel implements KeyListener {
                 if (rDisparo.intersects(rProyEnemigo)) {
                     itDisparos.remove();
                     itProy.remove();
-                    break; // salir del bucle interno
+                    break;
                 }
             }
         }
 
-        repaint();
+        // Detectar colisiones entre disparos y jefe
+        if (jefe != null) {
+            itDisparos = disparos.iterator();
+            Rectangle rJefe = jefe.getBounds();
+            while (itDisparos.hasNext()) {
+                Disparos d = itDisparos.next();
+                Rectangle rDisparo = new Rectangle(d.x, d.y, 5, 10);
+
+                if (rDisparo.intersects(rJefe)) {
+                    itDisparos.remove();
+                    jefe.recibirDanio();
+                    break;
+                }
+            }
+        }
+
+        // Detectar colisiones entre proyectiles y nave
         Iterator<ProyectilEnemigo> itProy = proyectiles.iterator();
         while (itProy.hasNext()) {
             ProyectilEnemigo p = itProy.next();
@@ -101,12 +141,12 @@ public class VentanaJuego extends JPanel implements KeyListener {
                 if (nave.estaDestruida()) {
                     naveDestruida = true;
                     explosion = new AnimacionExplosion(nave.getX(), nave.getY());
-                    // Cierra el juego
                 }
             } else if (p.estaFueraDeCampo(getHeight())) {
                 itProy.remove();
             }
         }
+
         if (naveDestruida && explosion != null) {
             explosion.actualizar();
             if (explosion.haTerminado()) {
@@ -115,6 +155,8 @@ public class VentanaJuego extends JPanel implements KeyListener {
                 System.exit(0);
             }
         }
+
+        repaint();
     }
 
     private void crearEnemigoAleatorio() {
@@ -170,7 +212,7 @@ public class VentanaJuego extends JPanel implements KeyListener {
         super.paintComponent(g);
         if (naveDestruida && explosion != null) {
             explosion.dibujar(g);
-            return; // no dibujamos más si la nave explotó
+            return;
         }
 
         nave.dibujar(g);
@@ -181,6 +223,10 @@ public class VentanaJuego extends JPanel implements KeyListener {
         g.setColor(Color.WHITE);
         for (ENEMIGO enemigo : enemigos) {
             g.drawString("🛸", enemigo.getX(), enemigo.getY() + 30);
+        }
+
+        if (jefe != null) {
+            jefe.dibujar(g);
         }
 
         g.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 24));
@@ -199,4 +245,5 @@ public class VentanaJuego extends JPanel implements KeyListener {
     public void keyReleased(KeyEvent e) {}
     public void keyTyped(KeyEvent e) {}
 }
+
 
