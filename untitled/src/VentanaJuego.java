@@ -19,6 +19,7 @@ public class VentanaJuego extends JPanel implements KeyListener {
     private Random random = new Random();
     private AnimacionExplosion explosion;
     private boolean naveDestruida = false;
+    private String dificultad = "Medio";
 
     // Agregar el jefe
     private Jefe jefe = null;
@@ -40,6 +41,10 @@ public class VentanaJuego extends JPanel implements KeyListener {
         timer = new Timer(30, e -> actualizarJuego());
         controlador = new ControladorJuego(timer, nave, disparos);
         timer.start();
+    }
+    public VentanaJuego(String dificultad) {
+        this(); // llama al constructor original
+        this.dificultad = dificultad;
     }
 
     private void actualizarJuego() {
@@ -68,9 +73,14 @@ public class VentanaJuego extends JPanel implements KeyListener {
             return p.estaFueraDeCampo(getHeight());
         });
 
-        if (random.nextInt(100) < 1 && enemigos.size() < 10) {
+        int frecuencia = switch (dificultad) {
+            case "Fácil" -> 130;
+            case "Difícil" -> 70;
+            default -> 100; // Medio
+        };
+
+        if (random.nextInt(frecuencia) < 1 && enemigos.size() < 10) {
             crearEnemigoAleatorio();
-            Iterator<ProyectilEnemigo> itProy = proyectiles.iterator();
         }
         Iterator<ENEMIGO> itEnemigos2 = enemigos.iterator();
         Rectangle rNave = new Rectangle(nave.getX(), nave.getY(), 30, 45);
@@ -202,7 +212,14 @@ public class VentanaJuego extends JPanel implements KeyListener {
             int col = x / 20;
 
             if (!campo.estaOcupado(fila, col)) {
-                int velocidad = 1 + random.nextInt(3);
+                // 🔁 Ajustar velocidad según dificultad
+                int velocidadBase = switch (dificultad) {
+                    case "Fácil" -> 1;
+                    case "Difícil" -> 3;
+                    default -> 2; // Medio
+                };
+
+                int velocidad = velocidadBase + random.nextInt(2);
                 ENEMIGO enemigo = new ENEMIGO(x, 0, 1, velocidad);
                 enemigos.add(enemigo);
                 campo.colocarEnemigo(fila, col);
@@ -247,6 +264,10 @@ public class VentanaJuego extends JPanel implements KeyListener {
         }
 
         nave.dibujar(g);
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        g.drawString("Dificultad: " + dificultad, 10, 20);
+        g.drawString("Vidas: " + nave.getVida(), 10, 40);
 
         for (Disparos d : disparos) d.dibujar(g);
 
