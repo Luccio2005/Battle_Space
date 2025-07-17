@@ -3,7 +3,8 @@ import java.awt.*;
 public class nave {
     int x, y;
     int velocidad = 10;
-    private int vida = 5; // NUEVO: vida de la nave
+    private int vida = 5;// NUEVO: vida de la nave
+
 
     public nave(int x, int y) {
         this.x = x;

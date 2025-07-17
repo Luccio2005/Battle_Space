@@ -1,3 +1,12 @@
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+import javax.swing.Timer;
+import java.awt.Rectangle;
+
+
 public class VentanaJuego extends JPanel implements KeyListener {
 
     private nave nave;
@@ -61,7 +70,27 @@ public class VentanaJuego extends JPanel implements KeyListener {
 
         if (random.nextInt(100) < 1 && enemigos.size() < 10) {
             crearEnemigoAleatorio();
+            Iterator<ProyectilEnemigo> itProy = proyectiles.iterator();
         }
+        Iterator<ENEMIGO> itEnemigos2 = enemigos.iterator();
+        Rectangle rNave = new Rectangle(nave.getX(), nave.getY(), 30, 45);
+
+        while (itEnemigos2.hasNext()) {
+            ENEMIGO enemigo = itEnemigos2.next();
+            Rectangle rEnemigo = new Rectangle(enemigo.getX(), enemigo.getY(), 30, 30);
+
+            if (rNave.intersects(rEnemigo)) {
+                itEnemigos2.remove(); // eliminar enemigo
+                nave.recibirDanio(); // dañar nave
+
+                if (nave.estaDestruida()) {
+                    naveDestruida = true;
+                    explosion = new AnimacionExplosion(nave.getX(), nave.getY());
+                }
+                break;
+            }
+        }
+
 
         // --- Manejar jefe ---
         if (jefe == null && enemigos.size() >= 10) {
@@ -110,6 +139,7 @@ public class VentanaJuego extends JPanel implements KeyListener {
             }
         }
 
+
         // Detectar colisiones entre disparos y jefe
         if (jefe != null) {
             itDisparos = disparos.iterator();
@@ -126,14 +156,15 @@ public class VentanaJuego extends JPanel implements KeyListener {
             }
         }
 
-        // Detectar colisiones entre proyectiles y nave
+        repaint();
+
         Iterator<ProyectilEnemigo> itProy = proyectiles.iterator();
         while (itProy.hasNext()) {
             ProyectilEnemigo p = itProy.next();
             p.mover();
 
             Rectangle rProy = new Rectangle(p.getX(), p.getY(), 5, 10);
-            Rectangle rNave = new Rectangle(nave.getX(), nave.getY(), 30, 45);
+            rNave.setBounds(nave.getX(), nave.getY(), 30, 45);
 
             if (rProy.intersects(rNave)) {
                 itProy.remove();
