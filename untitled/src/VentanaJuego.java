@@ -1,9 +1,11 @@
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import javax.swing.Timer;
 import java.awt.Rectangle;
+
 
 public class VentanaJuego extends JPanel implements KeyListener {
 
@@ -16,15 +18,12 @@ public class VentanaJuego extends JPanel implements KeyListener {
     private ControladorJuego controlador;
     private Random random = new Random();
     private AnimacionExplosion explosion;
-    private boolean jefeDerrotado = false;
     private boolean naveDestruida = false;
-    private boolean juegoGanado = false;
     private String dificultad = "Medio";
-    private int enemigosEliminados = 0; // Contador de enemigos eliminados (como en la Versión 1)
 
-    // Jefe
+    // Agregar el jefe
     private Jefe jefe = null;
-    private int contadorDisparoJefe = 0;
+    private int contadorDisparoJefe = 0;  // Controla cuándo dispara el jefe
 
     public VentanaJuego() {
         setPreferredSize(new Dimension(600, 600));
@@ -42,20 +41,16 @@ public class VentanaJuego extends JPanel implements KeyListener {
         timer = new Timer(30, e -> actualizarJuego());
         controlador = new ControladorJuego(timer, nave, disparos);
         timer.start();
-
     }
-
     public VentanaJuego(String dificultad) {
-        this();
+        this(); // llama al constructor original
         this.dificultad = dificultad;
     }
 
     private void actualizarJuego() {
-        // Mover disparos y eliminar los que salen de la pantalla
         for (Disparos d : disparos) d.mover();
         disparos.removeIf(d -> d.estaFuera());
 
-        // Mover enemigos y generar proyectiles
         Iterator<ENEMIGO> itEnemigos = enemigos.iterator();
         while (itEnemigos.hasNext()) {
             ENEMIGO enemigo = itEnemigos.next();
@@ -73,24 +68,20 @@ public class VentanaJuego extends JPanel implements KeyListener {
             }
         }
 
-        // Mover proyectiles enemigos y eliminar los que salen de la pantalla
         proyectiles.removeIf(p -> {
             p.mover();
             return p.estaFueraDeCampo(getHeight());
         });
 
-        // Generar enemigos
         int frecuencia = switch (dificultad) {
             case "Fácil" -> 130;
             case "Difícil" -> 70;
-            default -> 100;
+            default -> 100; // Medio
         };
 
         if (random.nextInt(frecuencia) < 1 && enemigos.size() < 10) {
             crearEnemigoAleatorio();
         }
-
-        // Detectar colisiones entre nave y enemigos
         Iterator<ENEMIGO> itEnemigos2 = enemigos.iterator();
         Rectangle rNave = new Rectangle(nave.getX(), nave.getY(), 30, 45);
 
@@ -99,8 +90,8 @@ public class VentanaJuego extends JPanel implements KeyListener {
             Rectangle rEnemigo = new Rectangle(enemigo.getX(), enemigo.getY(), 30, 30);
 
             if (rNave.intersects(rEnemigo)) {
-                itEnemigos2.remove();
-                nave.recibirDanio();
+                itEnemigos2.remove(); // eliminar enemigo
+                nave.recibirDanio(); // dañar nave
 
                 if (nave.estaDestruida()) {
                     naveDestruida = true;
@@ -110,39 +101,36 @@ public class VentanaJuego extends JPanel implements KeyListener {
             }
         }
 
-        // Aparicion Jefe
-        if (jefe == null && enemigosEliminados >= 6) { // Aparece después de 6 enemigos eliminados
-            jefe = new Jefe(getWidth() / 2 - 120, 200, 4, nave.getVida() * 5);
+
+        // --- Manejar jefe ---
+        if (jefe == null && enemigos.size() >= 10) {
+            // Cuando hay 10 enemigos, aparece el jefe (por ejemplo)
+            jefe = new Jefe(100, 50, 3, 10);
         }
 
         if (jefe != null) {
             jefe.moverHorizontal(getWidth());
 
-            // Disparo controlado por tiempo
+            // Controlar disparo del jefe cada cierto tiempo
             contadorDisparoJefe++;
-            if (contadorDisparoJefe >= 60) {
+            if (contadorDisparoJefe >= 60) {  // Cada 60 ciclos aprox
                 jefe.disparar(proyectiles);
                 contadorDisparoJefe = 0;
             }
 
-            if (jefe != null && jefe.getVida() <= 0 && !jefeDerrotado) {
+            // El jefe baja lentamente (opcional)
+            // jefe.setY(jefe.getY() + 1);
+
+            // Si el jefe muere, quitarlo
+            if (jefe.getVida() <= 0) {
                 jefe = null;
-                jefeDerrotado = true;
-                juegoGanado = true;
-                timer.stop();
-                String nombre = JOptionPane.showInputDialog(this, "¡Has ganado! Ingresa tu nombre (4 letras):");
-                if (nombre != null) {
-                    if (nombre.length() > 4) nombre = nombre.substring(0, 4);
-                    Puntaje.guardar(nombre, enemigosEliminados);
-                }
-                repaint();
+                // Quizás añadir más lógica al ganar jefe
             }
         }
 
-        // Detección de colisiones (disparos vs enemigos, disparos vs jefe)
         detectarColisiones();
 
-        // Colisión entre disparos y proyectiles enemigos
+        // Detectar colisiones entre disparos y proyectiles enemigos
         Iterator<Disparos> itDisparos = disparos.iterator();
         while (itDisparos.hasNext()) {
             Disparos disparo = itDisparos.next();
@@ -161,7 +149,8 @@ public class VentanaJuego extends JPanel implements KeyListener {
             }
         }
 
-        // Colisión entre disparos y jefe
+
+        // Detectar colisiones entre disparos y jefe
         if (jefe != null) {
             itDisparos = disparos.iterator();
             Rectangle rJefe = jefe.getBounds();
@@ -177,11 +166,15 @@ public class VentanaJuego extends JPanel implements KeyListener {
             }
         }
 
-        // Colisión entre proyectiles enemigos y nave
+        repaint();
+
         Iterator<ProyectilEnemigo> itProy = proyectiles.iterator();
         while (itProy.hasNext()) {
             ProyectilEnemigo p = itProy.next();
+            p.mover();
+
             Rectangle rProy = new Rectangle(p.getX(), p.getY(), 5, 10);
+            rNave.setBounds(nave.getX(), nave.getY(), 30, 45);
 
             if (rProy.intersects(rNave)) {
                 itProy.remove();
@@ -190,19 +183,16 @@ public class VentanaJuego extends JPanel implements KeyListener {
                     naveDestruida = true;
                     explosion = new AnimacionExplosion(nave.getX(), nave.getY());
                 }
+            } else if (p.estaFueraDeCampo(getHeight())) {
+                itProy.remove();
             }
         }
 
-        // Animación de explosión si la nave es destruida
         if (naveDestruida && explosion != null) {
             explosion.actualizar();
             if (explosion.haTerminado()) {
                 timer.stop();
-                String nombre = JOptionPane.showInputDialog(this, "Game Over. Ingresa tu nombre (4 letras):");
-                if (nombre != null) {
-                    if (nombre.length() > 4) nombre = nombre.substring(0, 4);
-                    Puntaje.guardar(nombre, enemigosEliminados);
-                }
+                JOptionPane.showMessageDialog(this, "¡La nave fue destruida!", "Game Over", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
         }
@@ -222,6 +212,7 @@ public class VentanaJuego extends JPanel implements KeyListener {
             int col = x / 20;
 
             if (!campo.estaOcupado(fila, col)) {
+                // 🔁 Ajustar velocidad según dificultad
                 int velocidadBase = switch (dificultad) {
                     case "Fácil" -> 1;
                     case "Difícil" -> 3;
@@ -257,7 +248,6 @@ public class VentanaJuego extends JPanel implements KeyListener {
                         int col = enemigo.getX() / 20;
                         campo.limpiarCelda(fila, col);
                         itEnemigos.remove();
-                        enemigosEliminados++; // Incrementa el contador de enemigos eliminados
                     }
                     break;
                 }
@@ -272,18 +262,12 @@ public class VentanaJuego extends JPanel implements KeyListener {
             explosion.dibujar(g);
             return;
         }
-        if (juegoGanado) {
-            g.setColor(Color.GREEN);
-            g.setFont(new Font("Segoe UI Emoji", Font.BOLD, 48));
-            g.drawString("🎉 YOU WIN 🎉", getWidth() / 2 - 150, getHeight() / 2);
-        }
 
         nave.dibujar(g);
         g.setColor(Color.WHITE);
         g.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        g.drawString("Dificultad ♦: " + dificultad, 10, 20);
-        g.drawString("Vidas ♥: " + nave.getVida(), 10, 40);
-        g.drawString("Puntaje ▄ : " + enemigosEliminados, 10, 60); // Muestra progreso
+        g.drawString("Dificultad: " + dificultad, 10, 20);
+        g.drawString("Vidas: " + nave.getVida(), 10, 40);
 
         for (Disparos d : disparos) d.dibujar(g);
 
@@ -306,27 +290,12 @@ public class VentanaJuego extends JPanel implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        ControladorEntrada.procesarTecla(e, nave, disparos, controlador, this);
+        ControladorEntrada.procesarTecla(e, nave, disparos, controlador);
         repaint();
     }
 
     public void keyReleased(KeyEvent e) {}
     public void keyTyped(KeyEvent e) {}
-
-    public boolean isJefeDerrotado() {
-        return jefeDerrotado;
-    }
-
-    public void setJefeDerrotado(boolean jefeDerrotado) {
-        this.jefeDerrotado = jefeDerrotado;
-    }
-
-    public boolean isJuegoGanado() {
-        return juegoGanado;
-    }
-
-    public void setJuegoGanado(boolean juegoGanado) {
-        this.juegoGanado = juegoGanado;
-    }
 }
+
 
