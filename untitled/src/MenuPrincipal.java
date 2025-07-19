@@ -91,7 +91,18 @@ public class MenuPrincipal extends JFrame {
             }
         });
 
-        btnPuntuaciones.setEnabled(false); // aún no implementado
+        btnPuntuaciones.setEnabled(true);
+        btnPuntuaciones.addActionListener(e -> {
+            java.util.List<String> top = Puntaje.obtenerTop(10);
+            StringBuilder sb = new StringBuilder("🏆 TOP 10 JUGADORES 🏆\n\n");
+            for (String linea : top) {
+                String[] partes = linea.split(",");
+                if (partes.length == 2) {
+                    sb.append(partes[0]).append(" : ").append(partes[1]).append("\n");
+                }
+            }
+            JOptionPane.showMessageDialog(this, sb.toString(), "Puntuaciones", JOptionPane.INFORMATION_MESSAGE);
+        });
         btnSalir.addActionListener(e -> System.exit(0));
 
         setVisible(true);

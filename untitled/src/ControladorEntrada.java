@@ -1,10 +1,13 @@
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import java.awt.Component;
 
 public class ControladorEntrada {
 
-    public static void procesarTecla(KeyEvent e, nave nave, ArrayList<Disparos> disparos, ControladorJuego controlador) {
+    public static void procesarTecla(KeyEvent e, nave nave, ArrayList<Disparos> disparos, ControladorJuego controlador, Component ventana) {
         char tecla = Character.toLowerCase(e.getKeyChar());
         int code = e.getKeyCode();
 
@@ -22,7 +25,7 @@ public class ControladorEntrada {
 
         if (code == KeyEvent.VK_ESCAPE) {
             controlador.pausar();
-            String[] opciones = { "Reanudar", "Reiniciar", "Salir" };
+            String[] opciones = { "Reanudar", "Reiniciar", "Menú Principal", "Salir" };
             int seleccion = JOptionPane.showOptionDialog(
                     null,
                     "Menú de pausa",
@@ -37,7 +40,12 @@ public class ControladorEntrada {
             switch (seleccion) {
                 case 0 -> controlador.reanudar();
                 case 1 -> controlador.reiniciar();
-                case 2 -> System.exit(0);
+                case 2 -> {
+                    JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(ventana);
+                    frame.dispose();
+                    new MenuPrincipal();
+                }
+                case 3 -> System.exit(0);
             }
         }
     }
