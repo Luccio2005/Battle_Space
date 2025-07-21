@@ -4,6 +4,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
+import java.awt.Dimension;
 
 public class ControladorEntrada {
 
@@ -11,11 +12,15 @@ public class ControladorEntrada {
         char tecla = Character.toLowerCase(e.getKeyChar());
         int code = e.getKeyCode();
 
+        Dimension size = ventana.getSize();
+        int ancho = size.width;
+        int alto = size.height;
+
         switch (tecla) {
-            case 'a' -> nave.moverIzquierda();
-            case 'd' -> nave.moverDerecha();
-            case 'w' -> nave.moverArriba();
-            case 's' -> nave.moverAbajo();
+            case 'a' -> nave.moverIzquierda(10);      // 10 píxeles desde el borde izquierdo
+            case 'd' -> nave.moverDerecha(ancho - 10); // 10 píxeles desde el borde derecho
+            case 'w' -> nave.moverArriba(80);         // 20 píxeles desde arriba
+            case 's' -> nave.moverAbajo(alto - 10);   // 10 píxeles desde abajo
             case ' ' -> disparos.add(nave.disparar());
         }
 

@@ -1,2 +1,5 @@
 lucc,7
 luis,6
+ aas,6
+sdsf,0
+ffsd,0

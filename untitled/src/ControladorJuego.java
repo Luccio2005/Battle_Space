@@ -23,8 +23,8 @@ public class ControladorJuego {
     }
 
     public void reiniciar() {
-        nave.setX(200);
-        nave.setY(100);
+        nave.setX(300);
+        nave.setY(500);
         disparos.clear();
         System.out.println("Juego reiniciado");
         timer.start();

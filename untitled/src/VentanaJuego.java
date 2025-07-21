@@ -30,7 +30,7 @@ public class VentanaJuego extends JPanel implements KeyListener {
         setPreferredSize(new Dimension(600, 600));
         setBackground(Color.BLACK);
 
-        nave = new nave(200, 100);
+        nave = new nave(300, 500);
         disparos = new ArrayList<>();
         enemigos = new ArrayList<>();
         proyectiles = new ArrayList<>();
@@ -301,6 +301,20 @@ public class VentanaJuego extends JPanel implements KeyListener {
         g.setColor(Color.YELLOW);
         for (ProyectilEnemigo p : proyectiles) {
             g.drawString("⇓", p.getX(), p.getY());
+        }
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Monospaced", Font.PLAIN, 12));
+
+// Borde izquierdo y derecho (║)
+        for (int i = 0; i < getHeight(); i += 15) {
+            g.drawString("\u2503", 0, i); // izquierdo
+            g.drawString("\u2503", getWidth() - 10, i); // derecho
+        }
+
+// Borde superior e inferior (═)
+        for (int i = 10; i < getWidth(); i += 15) {
+            g.drawString("\u2501", i, 70); // superior
+            g.drawString("\u2501", i, getHeight() - 5); // inferior
         }
     }
 
