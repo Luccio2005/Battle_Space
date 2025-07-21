@@ -272,10 +272,24 @@ public class VentanaJuego extends JPanel implements KeyListener {
             explosion.dibujar(g);
             return;
         }
-        if (juegoGanado) {
+         if (juegoGanado) {
+            
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, getWidth(), getHeight());
+
             g.setColor(Color.GREEN);
-            g.setFont(new Font("Segoe UI Emoji", Font.BOLD, 48));
-            g.drawString("🎉 YOU WIN 🎉", getWidth() / 2 - 150, getHeight() / 2);
+            g.setFont(new Font("Segoe UI Emoji", Font.BOLD, 72));
+            String mensajeWin = "🎉 YOU WIN 🎉";
+            int anchoTextoWin = g.getFontMetrics().stringWidth(mensajeWin);
+            g.drawString(mensajeWin, (getWidth() - anchoTextoWin) / 2, getHeight() / 2 - 40);
+
+            // Mostrar puntaje abajo
+            g.setFont(new Font("Monospaced", Font.PLAIN, 32));
+            String puntajeTexto = "PUNTAJE: " + enemigosEliminados;
+            int anchoTextoPuntaje = g.getFontMetrics().stringWidth(puntajeTexto);
+            g.drawString(puntajeTexto, (getWidth() - anchoTextoPuntaje) / 2, getHeight() / 2 + 20);
+
+            return;
         }
 
         nave.dibujar(g);
